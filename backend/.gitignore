@@ -1,23 +1,44 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Virtual environment
+venv/
+env/
 
-node_modules
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 .env
-dist
-dist-ssr
 *.local
 
-# Editor directories and files
+# Flask cache
+.instance/
+.webassets-cache
+
+# Python environment files
+.python-version
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# =========================
+# Editor files
+# =========================
+
 .vscode/*
 !.vscode/extensions.json
+
 .idea
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Visual Studio
 *.suo
 *.ntvs*
 *.njsproj
