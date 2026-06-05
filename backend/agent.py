@@ -1,4 +1,5 @@
 import os
+import re
 from google.genai import Client, types  # <-- Make sure to import types
 from dotenv import load_dotenv
 from pygments.lexers import guess_lexer
@@ -16,30 +17,31 @@ class CodeClarifyAgent:
         self.model_id = "gemini-2.5-flash"
 
     def perception_layer(self, source_code):
-        # 1. Hardcoded high-confidence structural overrides to prevent bad AI confusion
         stripped = source_code.strip()
-        
-        if "def " in stripped or "import re" in stripped or "print(" in stripped:
+
+        if re.search(r'import\s+\w+\s+from\s+[\'"]', stripped) or \
+           re.search(r'export\s+default', stripped) or \
+           re.search(r'<[A-Z][a-zA-Z]+', stripped):  # JSX component tags
+            language = "JavaScript/JSX"
+        elif "def " in stripped and ("return" in stripped or "print(" in stripped):
             language = "Python"
-        elif "function " in stripped or "const " in stripped or "let " in stripped or "=>" in stripped:
+        elif "function " in stripped or "const " in stripped or "=>" in stripped:
             language = "JavaScript"
-        elif "#include" in stripped or "std::cout" in stripped:
-            language = "C++"
-        elif "public class " in stripped and "System.out" in stripped:
+        elif "#include" in stripped or "std::" in stripped:
+            language = "C/C++"
+        elif "public class " in stripped:
             language = "Java"
         else:
-            # 2. Fallback to pygments guessing if no obvious rules match
             try:
                 lexer = guess_lexer(source_code)
                 language = lexer.name
-                
-                # Blacklist notoriously bad guesses for short scripts
                 if language in ["Tera Term Macro", "TTL", "Batchfile"]:
-                    language = "Python" # Safe fallback default
+                    language = "Unknown"
             except ClassNotFound:
                 language = "Unknown"
-                
+
         return {"code": source_code, "language": language}
+
     def reasoning_engine(self, perception_data, user_instruction="Explain this code"):
         code = perception_data["code"]
         lang = perception_data["language"]
