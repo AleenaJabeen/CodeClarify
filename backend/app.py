@@ -46,7 +46,11 @@ def summarize_code():
             "success": False,
             "message": str(e)
         }), 500
-
+@app.route("/detect-language", methods=["POST"])
+def detect_language():
+    data = request.get_json()
+    perception = agent.perception_layer(data.get("code", ""))
+    return jsonify({"language": perception["language"]})
 
 if __name__ == "__main__":
     app.run(debug=True)
